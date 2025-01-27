@@ -8,11 +8,10 @@ const razorpay = require('razorpay');
 
 exports.registerUser = async (req, res) => {
     try {
-
         const { name, email, password } = req.body;
 
         if (!name || !email || !password) {
-            return res.json({
+            return res.status(400).json({
                 sucess: false,
                 message: 'Missing details'
             })
@@ -29,23 +28,19 @@ exports.registerUser = async (req, res) => {
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET)
 
-
-        res.json({
+        res.status(200).json({
             success: true,
             token,
             user: {
                 name: user.name
             }
         })
-
     } catch (err) {
-        console.log("error")
-        console.error(err.message)
-        res.json({
+        console.log(err.message)
+        res.status(500).json({
             success: false,
-            message: err.message,
+            message: "Internal server error"
         })
-
     }
 }
 
@@ -55,8 +50,7 @@ exports.loginUser = async (req, res) => {
         const user = await userModel.findOne({ email })
 
         if (!user) {
-            console.log('User Does not exist')
-            return res.json({
+            return res.status(404).json({
                 success: false,
                 message: 'User does not exist'
             })
@@ -67,7 +61,7 @@ exports.loginUser = async (req, res) => {
         if (isMatch) {
             const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET)
 
-            res.json({
+            res.status(200).json({
                 success: true,
                 token,
                 user: {
@@ -75,32 +69,26 @@ exports.loginUser = async (req, res) => {
                 }
             })
         } else {
-            return res.json({
+            return res.status(401).json({
                 success: false,
                 message: 'Invalid credentials'
             })
         }
-
-
-
     } catch (err) {
-        console.log(error)
-        console.error(err.message)
-        res.json({
+        console.log(err.message)
+        res.status(500).json({
             success: false,
-            message: err.message
+            message: "Internal server error"
         })
-
     }
 }
 
 exports.userCredits = async (req, res) => {
-
     try {
         const { userId } = req.body
-
         const user = await userModel.findById(userId)
-        res.json({
+
+        res.status(200).json({
             success: true,
             credits: user.creditBalance,
             user: {
@@ -109,12 +97,11 @@ exports.userCredits = async (req, res) => {
         })
     } catch (err) {
         console.log(err.message)
-        res.json({
+        res.status(500).json({
             success: false,
-            messae: err.message
+            message: "Internal server error"
         })
     }
-
 }
 
 const razorpayInstance = new razorpay({
@@ -123,20 +110,15 @@ const razorpayInstance = new razorpay({
 });
 
 exports.paymentRazorpay = async (req, res) => {
-    console.log('5')
     try {
-        console.log('55')
         const { userId, planId } = req.body
-
         const userData = await userModel.findById(userId)
 
         if (!userId || !planId) {
-            console.log('555')
             return res.json({
                 success: false,
-                message: 'Missin Details'
+                message: 'Missing Details'
             })
-            console.log('user is not exiest')
         }
 
         let credits, plan, amount, date
@@ -180,30 +162,23 @@ exports.paymentRazorpay = async (req, res) => {
             currency: process.env.CURRENCY,
             receipt: newTransaction._id,
         }
-        console.log('52')
-        await razorpayInstance.orders.create(options, (error, order) => {
-            console.log('5555')
-            if (error) {
-                console.log(error)
-                console.log('..1..')
-                return res.json({
-                    success: false,
-                    message: error
-                }
 
-                )
+        await razorpayInstance.orders.create(options, (error, order) => {
+            if (error) {
+                console.log(error.message)
+                res.status(500).json({
+                    success: false,
+                    message: "Something went wrong"
+                })
             }
-            console.log('51')
-            res.json({ success: true, order })
+            res.status(200).json({ success: true, order })
         })
 
     } catch (error) {
-        console.log('55555')
-        console.log(error)
-        console.error(error)
-        res.json({
+        console.log(error.message)
+        res.status(500).json({
             success: false,
-            message: error.message
+            message: "Internal server error"
         })
     }
 }
@@ -211,7 +186,6 @@ exports.paymentRazorpay = async (req, res) => {
 exports.verifyRazorpay = async (req, res) => {
     try {
         const { razorpay_order_id } = req.body;
-
         const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id)
 
         if (orderInfo.status === 'paid') {
@@ -231,15 +205,18 @@ exports.verifyRazorpay = async (req, res) => {
 
             await transactionModel.findByIdAndUpdate(transactionData._id, { paymet: true })
 
-            res.json({ success: true, message: 'Credits Added' })
+            res.status(200).json({ success: true, message: 'Credits Added' })
         } else {
             res.json({
                 success: false,
                 message: 'Payment Failed'
-
             })
         }
     } catch (error) {
-        console.log(error);
+        console.log(error.message)
+        res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        })
     }
 }

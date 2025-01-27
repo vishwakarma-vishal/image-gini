@@ -26,7 +26,7 @@ const Navbar = () => {
                     hover:scale-105 transition-all duration-700'>
                                 <img className='w-5' src={assets.credit_star} alt='' />
                                 <p className='text-xs sm:text-sm font-medium
-                        text-gray-600'>Creduts left :{credit}</p>
+                        text-gray-600'>Credits left : {credit}</p>
                             </button>
                             <p>Hi, {user.name}</p>
                             <div className="relative group">

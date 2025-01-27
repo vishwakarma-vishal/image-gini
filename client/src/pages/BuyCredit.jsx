@@ -7,7 +7,7 @@ import { toast } from 'react-toastify'
 import axios from 'axios'
 
 const BuyCredit = () => {
-  const { user, backenUrl, loadCreditsData, backendUrl, token, setShowLogin } = useContext(AppContext);
+  const { user, backenUrl, loadCreditData, backendUrl, token, setShowLogin } = useContext(AppContext);
   const navigate = useNavigate()
 
   const initPay = async (order) => {
@@ -25,7 +25,7 @@ const BuyCredit = () => {
             response, { headers: { token } })
 
           if (data.success) {
-            loadCreditsData();
+            loadCreditData();
             navigate('/')
             toast.success('Credit Added')
           }

@@ -1,42 +1,35 @@
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
+exports.userAuth = async (req, res, next) => {
+    const { token } = req.headers;
 
-exports.userAuth = async (req,res,next)=>{
-    const {token }= req.headers;
-
-    if(!token){
+    if (!token) {
         console.log('0')
         return res.json({
-            success:false,
-            message:'Not Authorized. Login Again'
+            success: false,
+            message: 'Not Authorized. Login Again'
         })
-
     }
 
-    try{
-        console.log('00')
+    try {
         const tokenDecode = jwt.verify(token, process.env.JWT_SECRET)
 
-        if(tokenDecode.id){
-            console.log('000')
+        if (tokenDecode.id) {
             req.body.userId = tokenDecode.id;
-        }else{
-            console.log('0000')
+        } else {
             return res.json({
                 success: false,
-                messae:'Not Authorized. Login Again'
+                messae: 'Not Authorized. Login Again'
             })
         }
-
         next();
 
-    }catch(err){
-        console.log('00000')
-         console.log(err.message)
+    } catch (err) {
+        console.log(err.message)
         res.json({
-            success:false,
-            message:err.message
+            success: false,
+            message: err.message
         })
     }
 }
