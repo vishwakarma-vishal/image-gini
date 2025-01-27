@@ -16,6 +16,15 @@ exports.registerUser = async (req, res) => {
                 message: 'Missing details'
             })
         }
+
+        const userInDb = await userModel.findOne({ email });
+        if (userInDb) {
+            return res.status(409).json({
+                success: false,
+                message: "User already exist, please login."
+            });
+        }
+
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
 

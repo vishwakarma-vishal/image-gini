@@ -44,8 +44,12 @@ const Login = () => {
                 }
             }
         } catch (err) {
-            toast.error(err.message)
-            console.log('error:', err.message)
+            if (err.response?.status === 409) {
+                toast.info("User already exists, please log in.");
+            } else {
+                toast.error(err.message)
+                console.log('error:', err.message)
+            }
         }
     }
 
@@ -69,7 +73,7 @@ const Login = () => {
                 <p className='text-sm'>Welcome back! Please sign in to continue</p>
 
                 {state !== 'Login' && <div className='border px-6 py-2 flex items-center ap-2 rounded-full mt-5'>
-                    <img src="/name.png" alt='' className="h-4 text-gray-200"/>
+                    <img src="/name.png" alt='' className="h-4 text-gray-200" />
                     <input
                         type='text'
                         className='outline-none text-sm px-2'
